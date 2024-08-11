@@ -15,8 +15,10 @@ discrete_observation_space_window_size = (env.observation_space.high-env.observa
 q_table = np.random.uniform(low=-2, high=0, size=discrete_observation_space_size+[env.action_space.n])
 
 def continous_to_discrete(state):
-    discrete_state = (state-env.observation_space.low)/discrete_observation_space_size
-    return tuple(discrete_state.astype(int))
+    discrete_state = (state-env.observation_space.low)/discrete_observation_space_window_size
+    rstate = tuple(discrete_state.astype(int))
+    print(f"state is {state}, discrete_state is {rstate}")
+    return rstate
 
 
 discrete_state = continous_to_discrete(env.reset()[0])

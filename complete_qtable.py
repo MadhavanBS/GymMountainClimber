@@ -14,8 +14,8 @@ q_table = np.random.uniform(low=-2, high=0, size=discrete_observation_space_size
 '''
 while not done: 
     action = 2
-    new_state, reward, done, _, _ = env.step(action)
-    # new_state, *others = env.step(action)
+    new_state, reward, termination, truncation, _ = env.step(action) 
+    done = termination or truncation
     # print(f"new_state: {new_state}\nreward: {reward}\ndone: {done}\n")
 
 env.close()

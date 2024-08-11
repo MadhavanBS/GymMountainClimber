@@ -5,7 +5,7 @@ env = gym.make('MountainCar-v0', render_mode=None)
 
 done = False
 
-learning_rate = 0.9
+learning_rate = 0.1
 discount = 0.95
 episodes = 25_000
 
@@ -24,6 +24,7 @@ q_table = np.random.uniform(low=-2, high=0, size=discrete_observation_space_size
 def continous_to_discrete(state):
     discrete_state = (state-env.observation_space.low)/discrete_observation_space_window_size
     rstate = tuple(discrete_state.astype(int))
+    # print(f"state: {state}, discrete state: {rstate}")
     return rstate
 
 
@@ -52,12 +53,13 @@ for episode in range(episodes):
             current_q = q_table[discrete_state+(action,)]
             new_q = (1-learning_rate) * current_q + (learning_rate)* (reward + discount*max_future_q)
             q_table[discrete_state+(action,)] = new_q
+            # print(f"old_q: {current_q}, new_q: {new_q}")
         elif new_state[0]>=env.unwrapped.goal_position:
             q_table[discrete_state+(action,)] = 0
             print(f"goal_reached {episode}")
 
         discrete_state = new_discrete_state
-
+    
     if episode%1000 == 0:
         print(episode)
     

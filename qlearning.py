@@ -1,5 +1,4 @@
 import gymnasium as gym
-import time
 env = gym.make('MountainCar-v0', render_mode="human")
 env.reset()
 done = False
@@ -11,6 +10,5 @@ while not done:
     action = 2
     new_state, reward, done, _, _ = env.step(action)
     print(f"new_state: {new_state}\nreward: {reward}\ndone: {done}\n")
-    env.render()
 
 env.close()

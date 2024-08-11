@@ -24,12 +24,17 @@ q_table = np.random.uniform(low=-2, high=0, size=discrete_observation_space_size
 def continous_to_discrete(state):
     discrete_state = (state-env.observation_space.low)/discrete_observation_space_window_size
     rstate = tuple(discrete_state.astype(int))
-    print(f"state is {state}, discrete_state is {rstate}")
     return rstate
 
 
 
 for episode in range(episodes):
+
+    if episode % 1000 == 0:
+        env = gym.make('MountainCar-v0', render_mode="human")
+    else:
+        env = gym.make('MountainCar-v0', render_mode=None)
+
     discrete_state = continous_to_discrete(env.reset()[0])
     done = False
 
@@ -47,20 +52,17 @@ for episode in range(episodes):
             current_q = q_table[discrete_state+(action,)]
             new_q = (1-learning_rate) * current_q + (learning_rate)* (reward + discount*max_future_q)
             q_table[discrete_state+(action,)] = new_q
-            print(f"current_q: {current_q}, new_q: {new_q}")
         elif new_state[0]>=env.unwrapped.goal_position:
             q_table[discrete_state+(action,)] = 0
             print(f"goal_reached {episode}")
 
         discrete_state = new_discrete_state
 
-    if episode%2000 == 0:
+    if episode%1000 == 0:
         print(episode)
-        print(f"new_state: {new_state}\nreward: {reward}\ndone: {done}\n")
     
     if end_epsilon_decaying >= episode >= start_epsilon_decaying:
         epsilon -= epsilon_decay_value
 
-    ipdb.set_trace()
 
 env.close()

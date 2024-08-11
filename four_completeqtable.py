@@ -7,7 +7,7 @@ done = False
 
 learning_rate = 0.1
 discount = 0.95
-episodes = 25_000
+episodes = 2000
 
 
 discrete_observation_space_size = [20] * len(env.observation_space.high)
@@ -22,6 +22,12 @@ def continous_to_discrete(state):
 
 
 for episode in range(episodes):
+
+    if episode % 200 == 0:
+        env = gym.make('MountainCar-v0', render_mode="human")
+    else:
+        env = gym.make('MountainCar-v0', render_mode=None)
+
     discrete_state = continous_to_discrete(env.reset()[0])
     done = False
 
@@ -42,9 +48,5 @@ for episode in range(episodes):
 
         discrete_state = new_discrete_state
 
-    if episode%2000 == 0:
-        print(episode)
-        print(f"new_state: {new_state}\nreward: {reward}\ndone: {done}\n")
     
-
 env.close()

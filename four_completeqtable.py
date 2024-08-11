@@ -21,21 +21,22 @@ def continous_to_discrete(state):
 
 discrete_state = continous_to_discrete(env.reset()[0])
 
-while not done: 
-    action = np.argmax(q_table[discrete_state])
-    new_state, reward, termination, truncation, _ = env.step(action) 
-    new_discrete_state = continous_to_discrete(new_state)
-    done = termination or truncation
-    # print(f"new_state: {new_state}\nreward: {reward}\ndone: {done}\n")
-    if not done:
-        max_future_q = np.max(q_table[new_discrete_state])
-        current_q = q_table[discrete_state+(action,)]
-        new_q = (1-learning_rate) * current_q + (learning_rate)* (reward + discount*max_future_q)
-        q_table[discrete_state+(action,)] = new_q
-    elif new_state[0]>=env.unwrapped.goal_position:
-        q_table[discrete_state+(action,)] = 0
+for episode in range(episodes):
+    while not done: 
+        action = np.argmax(q_table[discrete_state])
+        new_state, reward, termination, truncation, _ = env.step(action) 
+        new_discrete_state = continous_to_discrete(new_state)
+        done = termination or truncation
+        # print(f"new_state: {new_state}\nreward: {reward}\ndone: {done}\n")
+        if not done:
+            max_future_q = np.max(q_table[new_discrete_state])
+            current_q = q_table[discrete_state+(action,)]
+            new_q = (1-learning_rate) * current_q + (learning_rate)* (reward + discount*max_future_q)
+            q_table[discrete_state+(action,)] = new_q
+        elif new_state[0]>=env.unwrapped.goal_position:
+            q_table[discrete_state+(action,)] = 0
 
-    discrete_state = new_discrete_state
+        discrete_state = new_discrete_state
 
 print("done")
 

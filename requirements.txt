@@ -1,3 +1,5 @@
 gymnasium===0.26.2
 pygame
 numpy===1.26.2
+opencv-python
+pillow

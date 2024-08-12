@@ -1,7 +1,6 @@
 import gymnasium as gym
 import numpy as np
-import os
-
+import ipdb
 import matplotlib.pyplot as plt
 env = gym.make('MountainCar-v0', render_mode=None)
 
@@ -31,10 +30,6 @@ def continous_to_discrete(state):
 
 episode_rewards = []
 aggregate_episode_rewards = {'episode': [], 'avg': [], 'min': [], 'max': []}
-
-if not os.path.exists('qtables/'):
-    os.mkdir('qtables/')
-     
 for episode in range(episodes):
     episode_reward = 0
     if not episode % (show_every*2):

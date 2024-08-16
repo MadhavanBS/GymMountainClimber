@@ -5,26 +5,27 @@ import matplotlib.pyplot as plt
 import pickle
 from matplotlib import style
 import time
+import ipdb
 
 style.use("ggplot")
 
 sizes = 10
 
-episodes = 25000
+episodes = 100_000
 
 move_penalty = 1
 
-enemy_penalty = 300
+enemy_penalty = 50
 
 food_reward = 25
 
-epsilon = 0.9
+epsilon = 0.1
 
-epsilon_decay = 0.9998
+epsilon_decay = 1
 
-show_every = 3000
+show_every = 100
 
-start_q_table = None
+start_q_table = "RLEnvironment/qtable-1723809971.pickle"
 
 learning_rate = 0.1
 
@@ -49,17 +50,25 @@ class Blob:
         return f"({self.x},{self.y})"
 
     def __sub__(self, other):
-        return (self.x-other.x, self.y, other.y)
+        return (self.x-other.x, self.y-other.y)
 
     def action(self, choice):
         if choice == 0:
-            self.move(x=1, y=1)
+            self.move(x=1, y=0)
         elif choice == 1:
-            self.move(x=-1, y=-1)
+            self.move(x=-1, y=0)
         elif choice == 2:
-            self.move(x=-1, y=1)
+            self.move(x=0, y=1)
         elif choice == 3:
+            self.move(x=0, y=-1)
+        elif choice == 4:
+            self.move(x=1, y=1)
+        elif choice == 5:
+            self.move(x=-1, y=-1)
+        elif choice == 6:
             self.move(x=1, y=-1)
+        elif choice == 7:
+            self.move(x=-1, y=1)
         
     def move(self, x=False, y=False):
         if not x:
@@ -68,7 +77,7 @@ class Blob:
             self.x += x
 
         if not y:
-            self.y +=np.randint.randint(-1,2)
+            self.y +=np.random.randint(-1,2)
         else:
             self.y += y
 
@@ -88,11 +97,10 @@ if start_q_table is None:
         for y1 in range(-sizes+1, sizes):
             for x2 in range(-sizes+1, sizes):
                 for y2 in range(-sizes+1, sizes):
-                    q_table[((x1,y1), (x2,y2))] = [np.random.uniform(-5,0) for i in range(4)]
+                    q_table[((x1,y1), (x2,y2))] = [np.random.uniform() for i in range(8)]
 else:
     with open(start_q_table, "rb") as f:
         q_table = pickle.load(f)
-
 
 episode_rewards = []
 
@@ -114,11 +122,11 @@ for episode in range(episodes):
         if np.random.random() > epsilon:
             action = np.argmax(q_table[obs])
         else:
-            action = np.random.randint(0,4)
+            action = np.random.randint(0,8)
         
         player.action(action)
 
-        if player.x == enemy.x and player.y == enemy_number.y:
+        if player.x == enemy.x and player.y == enemy.y:
             reward = -enemy_penalty
         elif player.x == food.x and player.y == food.y:
             reward = food_reward
@@ -127,7 +135,7 @@ for episode in range(episodes):
 
         new_observation = (player-food, player-enemy)
 
-        max_future_q = np.max(q_table[new_observation]  )
+        max_future_q = np.max(q_table[new_observation])
 
         current_q = q_table[obs][action]
 
@@ -136,57 +144,42 @@ for episode in range(episodes):
         elif reward == -enemy_penalty:
             new_q = -enemy_penalty
         else:
-            new_q = (1-learning_rate)*current_q + (learning_rate)*(reward+discount*max_future_q)
+            new_q = (1 - learning_rate) * current_q + (learning_rate) * (reward + discount * max_future_q)
 
         q_table[obs][action] = new_q
 
         if show:
-            env = np.zeros((SIZE, SIZE, 3), dtype=np.uint8)
+            env = np.zeros((sizes, sizes, 3), dtype=np.uint8)
             env[food.y][food.x] = d[food_number]
             env[player.y][player.x] = d[player_number]
             env[enemy.y][enemy.x] = d[enemy_number]
 
             img = Image.fromarray(env, "RGB")
-            img = img.resize((300,300))
+            img = img.resize((300, 300), resample=Image.BOX)
             cv2.imshow("", np.array(img))
 
-            if reward == food_reward or reward == enemy_penalty:
+            if reward == food_reward or reward == -enemy_penalty:
                 if cv2.waitKey(500) & 0xFF == ord("q"):
                     break
             elif cv2.waitKey(1) & 0xFF == ord("q"):
                     break
 
         episode_reward += reward
-        if reward ==  food_reward or reward == enemy_penalty:
+        if reward ==  food_reward or reward == -enemy_penalty:
             break
         
-        episode_rewards.append(episode_reward)
-        epsilon*= epsilon_decay
+    episode_rewards.append(episode_reward)
+    epsilon*= epsilon_decay
 
 moving_avg = np.convolve(episode_rewards, np.ones((show_every,))/show_every, mode="valid")
+
+with open(f"RLEnvironment/qtable-{int(time.time())}.pickle", "wb") as f:
+    pickle.dump(q_table, f)
+    # observation space is 2 co ordiantes, other 2 cordinates x2, y2 (x1,y1) and (x2, y2)
 
 plt.plot([i for i in range(len(moving_avg))], moving_avg)
 plt.ylabel(f"reward of moving_avg {show_every}")
 plt.xlabel("episode #")
+plt.savefig('RLEnvironment/plot.png') 
 plt.show()
-
-with open(f"qtable-{int(time.time())}.pickle", "wb") as f:
-    pickle.dump(q_table, f)
-
-
-
-
-
-
-
-             
-
-
-
-
-
-
-
-    # observation space is 2 co ordiantes, other 2 cordinates x2, y2 (x1,y1) and (x2, y2)
-
 

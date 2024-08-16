@@ -34,7 +34,7 @@ aggregate_episode_rewards = {'episode': [], 'avg': [], 'min': [], 'max': []}
 
 if not os.path.exists('qtables/'):
     os.mkdir('qtables/')
-     
+    
 for episode in range(episodes):
     episode_reward = 0
     if not episode % (show_every*2):

@@ -189,16 +189,9 @@ class ModifiedTensorBoard(TensorBoard):
         self.writer = tf.summary.create_file_writer(self.log_dir)
         self._log_write_dir = self.log_dir
 
+    # Overriding this method to stop creating default log writer
     def set_model(self, model):
-        self.model = model
-
-        self._train_dir = os.path.join(self._log_write_dir, 'train')
-        self._train_step = self.model._train_counter
-
-        self._val_dir = os.path.join(self._log_write_dir, 'validation')
-        self._val_step = self.model._test_counter
-
-        self._should_write_train_graph = False
+        pass
 
     def on_epoch_end(self, epoch, logs=None):
         self.update_stats(**logs)
@@ -214,6 +207,8 @@ class ModifiedTensorBoard(TensorBoard):
             for key, value in stats.items():
                 tf.summary.scalar(key, value, step = self.step)
                 self.writer.flush()
+
+        #tf.summary.scalar('loss',stats['loss'], step=self.step)
 
 
 class DQNAgent:

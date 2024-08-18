@@ -73,16 +73,16 @@ class Blob:
         elif choice == 8:
             self.move(x=0, y=0)
 
-    def move(self, x=False, y=False):
+    def move(self, x=None, y=None):
 
         # If no value for x, move randomly
-        if not x:
+        if x == None:
             self.x += np.random.randint(-1, 2)
         else:
             self.x += x
 
         # If no value for y, move randomly
-        if not y:
+        if y == None:
             self.y += np.random.randint(-1, 2)
         else:
             self.y += y

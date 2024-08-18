@@ -193,7 +193,7 @@ class ModifiedTensorBoard(TensorBoard):
         self._train_dir = os.path.join(self._log_write_dir, 'train')
         self._train_step = model.train_step
         self._val_dir = os.path.join(self._log_write_dir, 'validation')
-        self._val_step = self.model.test_step
+        self._val_step = model.test_step
         self._should_write_train_graph = False
 
     def on_epoch_end(self, epoch, logs=None):
@@ -249,8 +249,8 @@ class DQNAgent:
     def update_replay_memory(self, transition):
         self.replay_memory.append(transition)
 
-    def get_qs(self, terminal_state, step):
-        return seld.model_predict(np.array(state).reshape(-1, *state.shape)/255)[0]
+    def get_qs(self, state):
+        return self.model.predict(np.array(state).reshape(-1, *state.shape)/255)[0]
 
     def train(self, terminal_state, step):
         if len(self.replay_memory) < min_replay_memory_size:
@@ -342,7 +342,7 @@ for episode in tqdm(range(1, episodes+1), ascii=True, unit="episode"):
 
         # Save model, but only when min reward is greater or equal a set value
         if mini_reward >= min_reward:
-            agent.model.save(f'models/{model_name}__{max_reward:_>7.2f}max_{average_reward:_>7.2f}avg_{min_reward:_>7.2f}min__{int(time.time())}.model')
+            agent.model.save(f'models/{model_name}__{max_reward:_>7.2f}max_{average_reward:_>7.2f}avg_{min_reward:_>7.2f}min__{int(time.time())}.keras')
 
     # Decay epsilon
     if epsilon > min_epsilon:

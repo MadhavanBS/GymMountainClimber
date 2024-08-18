@@ -50,7 +50,6 @@ class ModifiedTensorBoard(TensorBoard):
         self._write_logs(stats, self.step)
 
 
-
 class DQNAgent:
 
     def __init__(self):
@@ -86,51 +85,117 @@ class DQNAgent:
         model.compile(loss="mse", optimizer=Adam(lr=0.001), metrics=["accuracy"])
         return model
 
-def update_replay_memory(self, transition):
-    self.replay_memory.append(transition)
+    def update_replay_memory(self, transition):
+        self.replay_memory.append(transition)
 
-def get_qs(self, terminal_state, step):
-    return seld.model_predict(np.array(state).reshape(-1, *state.shape)/255)[0]
+    def get_qs(self, terminal_state, step):
+        return seld.model_predict(np.array(state).reshape(-1, *state.shape)/255)[0]
 
-def train(self, terminal_state, step):
-    if len(self.replay_memory) < min_replay_memory_size:
-        return
+    def train(self, terminal_state, step):
+        if len(self.replay_memory) < min_replay_memory_size:
+            return
 
-    mini_batch = random.sample(self.replay_memory, mini_batch_size)
+        mini_batch = random.sample(self.replay_memory, mini_batch_size)
 
-    current_states = np.array([transition[0] for transition in mini_batch])/ 255
+        current_states = np.array([transition[0] for transition in mini_batch])/ 255
 
-    current_qs_list = self.model.predict(current_states)
+        current_qs_list = self.model.predict(current_states)
 
-    new_current_states = np.array([transition[3] for transition in mini_batch])/255
+        new_current_states = np.array([transition[3] for transition in mini_batch])/255
 
-    future_qs_list = self.target_model.predict(new_current_states)
+        future_qs_list = self.target_model.predict(new_current_states)
 
-    X = []
-    y = []
-    
-    for index, (current_state, action, reward, new_current_state, done) in enumerate(mini_batch):
-        if not done:
-            max_future_q = np.max(future_qs_list{index})
-            new_q = reward + discount * max_future_q
+        X = []
+        y = []
+        
+        for index, (current_state, action, reward, new_current_state, done) in enumerate(mini_batch):
+            if not done:
+                max_future_q = np.max(future_qs_list{index})
+                new_q = reward + discount * max_future_q
+            else:
+                new_q = reward
+
+            current_qs = current_qs_list[index]
+
+            current_qs[action] = new_q
+
+            X.append(current_state)
+            y.append(current_qs)
+
+        self.model_fit(np.array(X)/255, np.array(y), batch_size=mini_batch_size,
+        verbose=0, shuffle=False, callbacks=[self.tensorboard] if terminal_state else None)
+
+        if terminal_state:
+            self.target_update_counter+=1
+
+        if self.target_update_counter > update_target_every:
+            self.target_model.set_weights(self.model.get_weights())
+            self.target_update_counter = 0
+
+
+class Blob:
+    def __init__(self, size):
+        self.size = size
+        self.x = np.random.randint(0, size)
+        self.y = np.random.randint(0, size)
+
+    def __str__(self):
+        return f"Blob ({self.x}, {self.y})"
+
+    def __sub__(self, other):
+        return (self.x-other.x, self.y-other.y)
+
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y
+
+    def action(self, choice):
+        '''
+        Gives us 9 total movement options. (0,1,2,3,4,5,6,7,8)
+        '''
+        if choice == 0:
+            self.move(x=1, y=1)
+        elif choice == 1:
+            self.move(x=-1, y=-1)
+        elif choice == 2:
+            self.move(x=-1, y=1)
+        elif choice == 3:
+            self.move(x=1, y=-1)
+
+        elif choice == 4:
+            self.move(x=1, y=0)
+        elif choice == 5:
+            self.move(x=-1, y=0)
+
+        elif choice == 6:
+            self.move(x=0, y=1)
+        elif choice == 7:
+            self.move(x=0, y=-1)
+
+        elif choice == 8:
+            self.move(x=0, y=0)
+
+    def move(self, x=False, y=False):
+
+        # If no value for x, move randomly
+        if not x:
+            self.x += np.random.randint(-1, 2)
         else:
-            new_q = reward
+            self.x += x
 
-        current_qs = current_qs_list[index]
+        # If no value for y, move randomly
+        if not y:
+            self.y += np.random.randint(-1, 2)
+        else:
+            self.y += y
 
-        current_qs[action] = new_q
-
-        X.append(current_state)
-        y.append(current_qs)
-
-    self.model_fit(np.array(X)/255, np.array(y), batch_size=mini_batch_size,
-     verbose=0, shuffle=False, callbacks=[self.tensorboard] if terminal_state else None)
-
-    if terminal_state:
-        self.target_update_counter+=1
-
-    if self.target_update_counter > update_target_every:
-        self.target_model.set_weights(self.model.get_weights())
-        self.target_update_counter = 
+        # If we are out of bounds, fix!
+        if self.x < 0:
+            self.x = 0
+        elif self.x > self.size-1:
+            self.x = self.size-1
+        if self.y < 0:
+            self.y = 0
+        elif self.y > self.size-1:
+            self.y = self.size-1
 
 

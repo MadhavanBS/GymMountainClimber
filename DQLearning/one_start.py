@@ -1,9 +1,9 @@
 import numpy as np
 import tensorflow.keras.backend as backend
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Conv2D, MaxPooling2D, Activation, Flatten
-from keras.optimizers import Adam
-from keras.callbacks import TensorBoard
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout, Conv2D, MaxPooling2D, Activation, Flatten
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.callbacks import TensorBoard
 import tensorflow as tf
 from collections import deque
 import time
@@ -189,9 +189,12 @@ class ModifiedTensorBoard(TensorBoard):
         self.writer = tf.summary.create_file_writer(self.log_dir)
         self._log_write_dir = self.log_dir
 
-    # Overriding this method to stop creating default log writer
     def set_model(self, model):
-        pass
+        self._train_dir = os.path.join(self._log_write_dir, 'train')
+        self._train_step = model.train_step
+        self._val_dir = os.path.join(self._log_write_dir, 'validation')
+        self._val_step = self.model.test_step
+        self._should_write_train_graph = False
 
     def on_epoch_end(self, epoch, logs=None):
         self.update_stats(**logs)
@@ -207,9 +210,6 @@ class ModifiedTensorBoard(TensorBoard):
             for key, value in stats.items():
                 tf.summary.scalar(key, value, step = self.step)
                 self.writer.flush()
-
-        #tf.summary.scalar('loss',stats['loss'], step=self.step)
-
 
 class DQNAgent:
 

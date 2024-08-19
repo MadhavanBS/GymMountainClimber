@@ -301,6 +301,7 @@ if not os.path.isdir('models'):
 agent = DQNAgent()
 
 for episode in tqdm(range(1, episodes+1), ascii=True, unit="episode"):
+
     agent.tensorboard.step = episode 
 
     episode_reward = 0
@@ -335,6 +336,7 @@ for episode in tqdm(range(1, episodes+1), ascii=True, unit="episode"):
     # Append episode reward to a list and log stats (every given number of episodes)
     ep_rewards.append(episode_reward)
     if not episode % aggregate_stats_every or episode == 1:
+         print(f"episode is {episode}")
         average_reward = sum(ep_rewards[-aggregate_stats_every:])/len(ep_rewards[-aggregate_stats_every:])
         mini_reward = min(ep_rewards[-aggregate_stats_every:])
         max_reward = max(ep_rewards[-aggregate_stats_every:])
